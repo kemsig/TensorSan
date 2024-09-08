@@ -49,42 +49,17 @@ void fc_forward(FCLayer *layer, float *input){
     }
     
     // get the activation function
-    float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
+    float (*acti_func)(float*,bool) = apply_activation(layer);
 
-    printf("layer=====\n");
     // apply activation function on outputs
-    for (int i = 0; i < layer->output_size; ++i){
-        float a = acti_func(layer->output[i], false);
-        printf("old %f, new ", layer->output[i]);
-        printf("%f\n", a);
-        layer->output[i] = a;
-    }
+    // for (int i = 0; i < layer->output_size; ++i){
+    //     float a = acti_func(layer->output[i], false);
+    //     printf("old %f, new ", layer->output[i]);
+    //     printf("%f\n", a);
+    //     layer->output[i] = a;
+    // }
 
 }
-
-void fc_forward_softmax(FCLayer *layer, float *input){
-    if (layer->activation_function != SOFTMAX){
-        fprintf(stderr, "Tried to go forward on a non softmax layer");
-        exit(1);
-    }
-
-
-    // idk why look more into
-    memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
-
-    // compute output = input * weight + biases
-    for (int i = 0; i < layer->output_size; ++i){
-        for (int j = 0; j < layer->input_size; j++) {
-            layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];
-        }
-    }
-    
-    // apply softmax
-    activation_softmax(layer);
-}
-
-
-
 
 // the loss function returns the COST
 float mean_squared_error(float *predicted, float *actual, int size){

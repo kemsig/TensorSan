@@ -10,7 +10,7 @@ SRCS = main.c data_loader.c nn/nn.c nn/activation.c
 OBJS = $(SRCS:.c=.o)
 
 # Header files
-HEADERS = data_loader.h nn/nn.h nn/activation.h
+HEADERS = data_loader.h nn/nn.h nn/activation.h nn/structs.h
 
 # Target to build the executable
 all: tensor_san

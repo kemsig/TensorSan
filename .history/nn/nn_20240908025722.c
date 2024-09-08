@@ -49,7 +49,7 @@ void fc_forward(FCLayer *layer, float *input){
     }
     
     // get the activation function
-    float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
+    float (*acti_func)(float*,bool) = apply_activation(layer->activation_function);
 
     printf("layer=====\n");
     // apply activation function on outputs

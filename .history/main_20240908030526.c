@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "nn/structs.h"
+#include "structs.h"
 #include "nn/nn.h"
 #include "nn/activation.h"
 #include "data_loader.h"
@@ -20,7 +20,7 @@ int main(){
 	load_mnist_labels(TRAIN_LABELS, &labels, &num_labels);
 	printf("Num of labels: %d\n", num_labels);
 
-	for (int i = 0; i < 1; ++i){
+	for (int i = 0; i < 20; ++i){
 		print_mnist_index(images, labels, i);
 	}
 

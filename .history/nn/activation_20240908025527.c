@@ -18,20 +18,18 @@ float activation_relu(float x, bool derivative){
 }
 
 void activation_softmax(FCLayer *layer){
-    float total = 0.0f;
+    float total += 0.0f;
 
     // get total
     for (int i = 0; i < layer->output_size; ++i){
         total += exp(layer->output[i]);
     }
 
-    printf("layer %f=====\n", total);
     // change outputs
     for (int i = 0; i < layer->output_size; ++i){
-        printf("old %f, new ", layer->output[i]);
-        layer->output[i] = exp(layer->output[i]) / total;
-        printf("%f\n", layer->output[i]);
+        layer->output[i] = layer->output[i] / total;
     }
+
     
 }
 

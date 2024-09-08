@@ -49,7 +49,7 @@ void fc_forward(FCLayer *layer, float *input){
     }
     
     // get the activation function
-    float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
+    float (*acti_func)(float*,bool) = apply_activation(layer->activation_function);
 
     printf("layer=====\n");
     // apply activation function on outputs
@@ -79,8 +79,18 @@ void fc_forward_softmax(FCLayer *layer, float *input){
         }
     }
     
-    // apply softmax
-    activation_softmax(layer);
+    // get the activation function
+    float (*acti_func)(float*,bool) = apply_activation(layer->activation_function);
+
+    printf("layer=====\n");
+    // apply activation function on outputs
+    for (int i = 0; i < layer->output_size; ++i){
+        float a = acti_func(layer->output[i], false);
+        printf("old %f, new ", layer->output[i]);
+        printf("%f\n", a);
+        layer->output[i] = a;
+    }
+
 }
 
 

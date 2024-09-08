@@ -1,9 +1,14 @@
 #ifndef ACTIVATION_H
 #define ACTIVATION_H
 
-#include "structs.h"
 #include <stdbool.h>
-
+#include <nn.h>
+typedef enum {
+    NONE = 0,
+    ReLU = 1,
+    SOFTMAX = 2,
+    SIGMOID = 3
+}Activation;
 
 float activation_none(float x, bool derivative);
 float activation_relu(float x, bool derivative);

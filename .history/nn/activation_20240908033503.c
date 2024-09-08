@@ -29,7 +29,7 @@ void activation_softmax(FCLayer *layer){
     // change outputs
     for (int i = 0; i < layer->output_size; ++i){
         printf("old %f, new ", layer->output[i]);
-        layer->output[i] = exp(layer->output[i]) / total;
+        layer->output[i] = layer->output[i] / total;
         printf("%f\n", layer->output[i]);
     }
     

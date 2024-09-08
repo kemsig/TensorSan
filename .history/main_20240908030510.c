@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "nn/structs.h"
+#include "structs.h"
 #include "nn/nn.h"
 #include "nn/activation.h"
 #include "data_loader.h"
@@ -20,7 +20,7 @@ int main(){
 	load_mnist_labels(TRAIN_LABELS, &labels, &num_labels);
 	printf("Num of labels: %d\n", num_labels);
 
-	for (int i = 0; i < 1; ++i){
+	for (int i = 0; i < 20; ++i){
 		print_mnist_index(images, labels, i);
 	}
 
@@ -29,7 +29,7 @@ int main(){
 	FCLayer *layer2 = init_fc_layer(10, 10, SOFTMAX);
 
 	fc_forward(layer1, images);
-	fc_forward_softmax(layer2, layer1->output);
+	fc_forward(layer2, layer1->output);
 
 
 
