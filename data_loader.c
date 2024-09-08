@@ -109,7 +109,7 @@ void print_mnist_index(float *images, unsigned char *labels, int index){
     printf("Index: %d\t Label: %d", index, *(labels + index));
     for (int i = 0; i < MNIST_ROW_SZ; i++) {
         for (int j = 0; j < MNIST_COL_SZ; j++) {
-            printf("%c", pixel_to_char(image[i * MNIST_COL_SZ + j]));
+            printf("%c ", pixel_to_char(image[i * MNIST_COL_SZ + j]));
         }
         printf("\n");
     }
