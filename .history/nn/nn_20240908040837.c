@@ -93,6 +93,4 @@ float mean_squared_error(float *predicted, float *actual, int size){
     return 0.0f;
 }
 
-float cross_entropy(float predicted, float actual);
-
 void fc_backward(FCLayer *layer, float *t);

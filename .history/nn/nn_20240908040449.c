@@ -45,7 +45,9 @@ void fc_forward(FCLayer *layer, float *input){
     // compute output = input * weight + biases
     for (int i = 0; i < layer->output_size; ++i){
         for (int j = 0; j < layer->input_size; j++) {
-            printf("w: %f b: %f in: %f\n", layer->weights[j * layer->output_size + i], layer->biases[i], input[j]);
+            printf("w: %f b: %f\n", layer->weights[j * layer->output_size + i], layer->biases[i]);
+
+
             layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];
         }
     }
@@ -92,7 +94,5 @@ void fc_forward_softmax(FCLayer *layer, float *input){
 float mean_squared_error(float *predicted, float *actual, int size){
     return 0.0f;
 }
-
-float cross_entropy(float predicted, float actual);
 
 void fc_backward(FCLayer *layer, float *t);

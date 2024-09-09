@@ -35,9 +35,6 @@ void activation_softmax(FCLayer *layer){
     
 }
 
-
-void derivative_ce_softmax();
-
 float activation_sigmoid(float x, bool derivative){
     if (derivative){
         float sigmoid = activation_sigmoid(x, false);

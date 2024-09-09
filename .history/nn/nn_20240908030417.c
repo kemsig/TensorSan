@@ -28,9 +28,9 @@ FCLayer* init_fc_layer(unsigned int input_size, unsigned int output_size, Activa
         layer->weights[i] = random_float();
     }
 
-    // initialize bias to random small value to avoid symmetry
+    // initialize bias to 0
     for (int i = 0; i < output_size; ++i) {
-        layer->biases[i] = (float)rand() / RAND_MAX * 0.01f;
+        layer->biases[i] = 0.0f;
     }
 
     // return layer
@@ -38,14 +38,12 @@ FCLayer* init_fc_layer(unsigned int input_size, unsigned int output_size, Activa
 }
 
 void fc_forward(FCLayer *layer, float *input){
-    
     // idk why look more into
     memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
 
     // compute output = input * weight + biases
     for (int i = 0; i < layer->output_size; ++i){
         for (int j = 0; j < layer->input_size; j++) {
-            printf("w: %f b: %f in: %f\n", layer->weights[j * layer->output_size + i], layer->biases[i], input[j]);
             layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];
         }
     }
@@ -92,7 +90,5 @@ void fc_forward_softmax(FCLayer *layer, float *input){
 float mean_squared_error(float *predicted, float *actual, int size){
     return 0.0f;
 }
-
-float cross_entropy(float predicted, float actual);
 
 void fc_backward(FCLayer *layer, float *t);
