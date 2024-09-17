@@ -54,21 +54,6 @@ void print_averages(FCLayer *layer) {
     }
     printf("Average bias: %f\n", bias_sum / layer->output_size);
 }
-
-int get_predicted_class(float *output, int size) {
-    int predicted_class = 0;
-    float max_value = output[0];
-
-    // Find the index of the maximum value in the output array
-    for (int i = 1; i < size; i++) {
-        if (output[i] > max_value) {
-            max_value = output[i];
-            predicted_class = i;
-        }
-    }
-    return predicted_class;
-}
-
 int main(){
 	unsigned char *labels;
 	float *images;
@@ -97,42 +82,32 @@ int main(){
     // }
 
 	// create layers
-	unsigned int epochs = 3;
-	FCLayer *layer1 = init_fc_layer(IMAGE_SIZE, 128, ReLU);
-	FCLayer *layer2 = init_fc_layer(128, 10, SOFTMAX);
+	unsigned int epochs = 10;
+	FCLayer *layer1 = init_fc_layer(IMAGE_SIZE, 10, ReLU);
+	FCLayer *layer2 = init_fc_layer(10, 10, SOFTMAX);
 
-	for (int j = 0; j < epochs; j++){
-		int num_correct = 0;
-		for (int i = 0; i < 60000; ++i){
-			
-			fc_forward(layer1, images+(IMAGE_SIZE*i));
-			fc_forward_softmax(layer2, layer1->output);
+	for (int i = 0; i < 60000; ++i){
+		printf("LABEL++++++ %d\n", *(labels+(i)));
+		fc_forward(layer1, images+(728*i));
+		fc_forward_softmax(layer2, layer1->output);
 
+		// find d_output
+		float *d_output = derivative_softmax_categorical_cross_entropy(layer2->output, one_hot_matrix+(10*i), 10);
 
-			// find d_output
-			float *d_output = derivative_softmax_categorical_cross_entropy(layer2->output, one_hot_matrix+(10*i), 10);
+		fc_backward(layer2, d_output);
+		fc_backward(layer1, layer2->d_input);
 
-			fc_backward(layer2, d_output);
-			fc_backward(layer1, layer2->d_input);
-			
-		
+		// update weights
+		float learning_rate = 0.001f;
+		update_weights(layer2, learning_rate);
+		update_weights(layer1, learning_rate);
 
-			// update weights
-			float learning_rate = 0.001f;
-			update_weights(layer2, learning_rate);
-			update_weights(layer1, learning_rate);
-
-
-			if (*(labels+(i)) == get_predicted_class(layer2->output, 10))
-				num_correct++;
-			printf("LABEL++++++ %d, predicted: %d, accuracy: %f\n", *(labels+(i)), get_predicted_class(layer2->output, 10), num_correct/(float)i);
-			// for (int k = 0; k < 10; ++k) {
-           	//  	printf("%f ", one_hot_matrix[i * 10 + k]);
-			// }
-			// printf("\n");
-			free(d_output);
-		}	
+		// chat  gpt add function here to  give me the average  of weights in layer 1 and 2 along with all the biases
+		print_averages(layer2);
+		print_averages(layer1);
+		free(d_output);
 	}
+	
 
 
 	// Free allocated memory

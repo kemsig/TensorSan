@@ -31,7 +31,7 @@ FCLayer* init_fc_layer(unsigned int input_size, unsigned int output_size, Activa
 
     // initialize random weights
     for (int i = 0; i < input_size*output_size; ++i){
-        layer->weights[i] =  random_float();
+        layer->weights[i] = random_float();
     }
 
     // initialize bias to random small value to avoid symmetry
@@ -48,9 +48,6 @@ void fc_forward(FCLayer *layer, float *input){
     // copy input into layer->input
     memset(layer->output, 0, layer->output_size * sizeof(float));  // Zero out output
     memcpy(layer->input, input, layer->input_size * sizeof(float));
-    
-    
-    
 
     // copy biases into output layer
     memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
@@ -66,12 +63,12 @@ void fc_forward(FCLayer *layer, float *input){
     // get the activation function
     float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
 
-    // printf("layer=====\n");
+    printf("layer=====\n");
     // apply activation function on outputs
     for (int i = 0; i < layer->output_size; ++i){
         float a = acti_func(layer->output[i], false);
-        // printf("old %f, new ", layer->output[i]);
-        // printf("%f\n", a);
+        printf("old %f, new ", layer->output[i]);
+        printf("%f\n", a);
         layer->output[i] = a;
     }
 
@@ -86,12 +83,8 @@ void fc_forward_softmax(FCLayer *layer, float *input){
     // copy input into layer->input
     memcpy(layer->input, input, layer->input_size * sizeof(float));
 
-    // for (int i = 0; i < layer->input_size; ++i){
-    //     printf("gIN %f, nIN %f\n", input[i], layer->input[i]);
-    // }
-
     // copy biases into output layer
-    memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
+    //memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
 
     // compute output = input * weight + biases
     for (int i = 0; i < layer->output_size; ++i){
@@ -99,58 +92,12 @@ void fc_forward_softmax(FCLayer *layer, float *input){
             layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];      // this way mimics the transposition
         }
     }
-
-    // for (int i = 0; i < layer->output_size; ++i){
-    //     printf("%f, ", layer->output[i]);
-    // }
-    // printf("&&&\n");
+    
     // apply softmax
     activation_softmax(layer);
 }
 
-void reset_gradients(float* d_weights, float* d_biases, int size_weights, int size_biases) {
-    for (int i = 0; i < size_weights; i++) {
-        d_weights[i] = 0.0;
-    }
-    for (int i = 0; i < size_biases; i++) {
-        d_biases[i] = 0.0;
-    }
-}
-
-
 void fc_backward(FCLayer *layer, float *d_output){
-    // get activation function and it's derivative
-    float (*acti_func)(float, bool) = apply_activation(layer->activation_function);
-
-    // Compute the gradient of the activation function
-    float *dZ = (float *)malloc(layer->output_size * sizeof(float));
-    for (int i = 0; i < layer->output_size; ++i) {
-        dZ[i] = d_output[i] * acti_func(layer->output[i], true); // Derivative
-    }
-
-    for (int i = 0; i < layer->input_size; ++i){
-        for (int j = 0; j < layer->output_size; ++j){
-            layer->d_weights[i * layer->output_size + j] = layer->input[i] * dZ[j];         //segfdault
-        }
-    }
-
-    for (int i = 0; i < layer->output_size; ++i){
-        layer->d_biases[i] = dZ[i];
-    }
-
-    for (int i = 0; i < layer->input_size; ++i){
-        layer->d_input[i] = 0.0f;
-
-        for (int j = 0; j < layer->output_size; ++j){
-            layer->d_input[i] += dZ[j] * layer->weights[i * layer->output_size + j];
-        }
-    }
-    free(dZ);
-}
-
-void fc_backward_2(FCLayer *layer, float *d_output){
-    // reset gradients
-    reset_gradients(layer->d_weights, layer->d_biases,layer->input_size * layer->output_size, layer->output_size);
     // get activation function and it's derivative
     float (*acti_func)(float, bool) = apply_activation(layer->activation_function);
 
@@ -206,7 +153,7 @@ float* derivative_softmax_categorical_cross_entropy(float *predicted, float *act
 
     for (int i = 0; i < size; ++i){
         errors[i] = predicted[i] - actual[i];
-        // printf("e: %f, ", errors[i]);
+        printf("e: %f, ", errors[i]);
     }
 
     return errors;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
+#define test 28*28
 
 int main(){
-	printf("%f, %f", fmaxf(0.0f, 1.0f), exp(2.0f));
+	printf("%d", test);
 }
