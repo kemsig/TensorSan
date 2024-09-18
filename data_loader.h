@@ -14,5 +14,7 @@ void load_mnist_labels(const char*filename, unsigned char **labels, int *num_lab
 
 void print_mnist_index(float *images, unsigned char *labels, int index);
 
+void one_hot_encode(unsigned char *labels, int num_labels, float *one_hot_matrix, int num_classes);
+
 #endif
 

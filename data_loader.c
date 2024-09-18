@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h> 
 #include "data_loader.h"
 
@@ -59,9 +60,6 @@ void load_mnist_images(const char *filename, float **images, int *num_images){
     fclose(file);
 }
 
-
-
-
 void load_mnist_labels(const char*filename, unsigned char **labels, int *num_labels){
     // open file
     FILE *file = fopen(filename, "rb");
@@ -114,4 +112,17 @@ void print_mnist_index(float *images, unsigned char *labels, int index){
         printf("\n");
     }
 
+}
+
+// Function to perform one-hot encoding for MNIST labels
+void one_hot_encode(unsigned char *labels, int num_labels, float *one_hot_matrix, int num_classes) {
+    // Initialize the matrix to all zeros
+    memset(one_hot_matrix, 0, num_labels * num_classes * sizeof(float));
+
+    for (int i = 0; i < num_labels; ++i) {
+        int label = labels[i];
+        if (label >= 0 && label < num_classes) {
+            one_hot_matrix[i * num_classes + label] = 1;
+        }
+    }
 }

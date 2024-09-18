@@ -31,7 +31,7 @@ FCLayer* init_fc_layer(unsigned int input_size, unsigned int output_size, Activa
 
     // initialize random weights
     for (int i = 0; i < input_size*output_size; ++i){
-        layer->weights[i] =  random_float();
+        layer->weights[i] = random_float();
     }
 
     // initialize bias to random small value to avoid symmetry
@@ -49,8 +49,6 @@ void fc_forward(FCLayer *layer, float *input){
     memset(layer->output, 0, layer->output_size * sizeof(float));  // Zero out output
     memcpy(layer->input, input, layer->input_size * sizeof(float));
     
-    
-    
 
     // copy biases into output layer
     memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
@@ -58,7 +56,6 @@ void fc_forward(FCLayer *layer, float *input){
     // compute output = input * weight + biases
     for (int i = 0; i < layer->output_size; ++i){
         for (int j = 0; j < layer->input_size; j++) {
-          //  printf("w: %f b: %f in: %f\n", layer->weights[j * layer->output_size + i], layer->biases[i], input[j]);
             layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];
         }
     }
@@ -66,12 +63,9 @@ void fc_forward(FCLayer *layer, float *input){
     // get the activation function
     float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
 
-    // printf("layer=====\n");
     // apply activation function on outputs
     for (int i = 0; i < layer->output_size; ++i){
         float a = acti_func(layer->output[i], false);
-        // printf("old %f, new ", layer->output[i]);
-        // printf("%f\n", a);
         layer->output[i] = a;
     }
 
@@ -86,24 +80,16 @@ void fc_forward_softmax(FCLayer *layer, float *input){
     // copy input into layer->input
     memcpy(layer->input, input, layer->input_size * sizeof(float));
 
-    // for (int i = 0; i < layer->input_size; ++i){
-    //     printf("gIN %f, nIN %f\n", input[i], layer->input[i]);
-    // }
-
     // copy biases into output layer
     memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
 
     // compute output = input * weight + biases
     for (int i = 0; i < layer->output_size; ++i){
         for (int j = 0; j < layer->input_size; j++) {
-            layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];      // this way mimics the transposition
+            layer->output[i] += input[j] * layer->weights[j * layer->output_size + i];
         }
     }
 
-    // for (int i = 0; i < layer->output_size; ++i){
-    //     printf("%f, ", layer->output[i]);
-    // }
-    // printf("&&&\n");
     // apply softmax
     activation_softmax(layer);
 }
@@ -148,65 +134,35 @@ void fc_backward(FCLayer *layer, float *d_output){
     free(dZ);
 }
 
-void fc_backward_2(FCLayer *layer, float *d_output){
-    // reset gradients
-    reset_gradients(layer->d_weights, layer->d_biases,layer->input_size * layer->output_size, layer->output_size);
-    // get activation function and it's derivative
-    float (*acti_func)(float, bool) = apply_activation(layer->activation_function);
+void update_weights(FCLayer *layer, float learning_rate) {
+    // Update weights
+    for (int i = 0; i < layer->input_size * layer->output_size; ++i) {
+        layer->weights[i] = layer->weights[i] - (learning_rate * layer->d_weights[i]);
+    }
 
-    // Compute the gradient of the activation function
-    float *d_activation = (float *)malloc(layer->output_size * sizeof(float));
+    // Update biases
     for (int i = 0; i < layer->output_size; ++i) {
-     //   printf("output: %f\n", layer->output[i]);
-        d_activation[i] = acti_func(layer->output[i], true); // Derivative
+        layer->biases[i] -= learning_rate * layer->d_biases[i];
     }
-
-    // multiply d_output by d_activation
-    for (int i = 0; i < layer->output_size; ++i) {
-        d_output[i] *= d_activation[i];
-       // printf("doutput: %f\n", d_output[i]);
-    }
-
-    // set d_bias to be d_output
-    memcpy(layer->d_biases, d_output, layer->output_size * sizeof(float));
-
-    // compute d_weights
-    memset(layer->d_weights, 0, layer->input_size * layer->output_size * sizeof(float));
-    for (int i = 0; i < layer->output_size; ++i) {
-        for (int j = 0; j < layer->input_size; ++j) {
-            //printf("cur %f\n", layer->d_weights[j * layer->output_size + i] );
-            layer->d_weights[j * layer->output_size + i] = d_output[i] * layer->input[j];
-         //   printf("%f, ", layer->d_weights[j * layer->output_size + i]);
-        }
-    }
-
-    // Compute d_input
-    memset(layer->d_input, 0, layer->input_size * sizeof(float));
-    
-    for (int i = 0; i < layer->input_size; ++i) {
-        for (int j = 0; j < layer->output_size; ++j) {
-            layer->d_input[i] += d_output[j] * layer->weights[i * layer->output_size + j];
-        }
-        
-    }
-
-    // Free temporary memory
-    free(d_activation);
 }
 
 // the loss function returns the COST
 float categorical_cross_entropy(float *predicted, float *actual, int size){
-    return 0.0f;
+    float loss = 0.0f;
+
+    for (int i = 0; i < size; ++i){
+        if (actual[i] == 1)
+            loss -= logf(fmaxf(predicted[i], 1e-15));
+    }
+    return loss;
 }
 
-// for softmax
 float* derivative_softmax_categorical_cross_entropy(float *predicted, float *actual, size_t size){
     // make an array to store the errors
     float* errors = (float *)malloc(size * sizeof(float));
 
     for (int i = 0; i < size; ++i){
         errors[i] = predicted[i] - actual[i];
-        // printf("e: %f, ", errors[i]);
     }
 
     return errors;

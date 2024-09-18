@@ -8,52 +8,9 @@
 
 #define TRAIN_IMAGES "Datasets/MNIST/train-images-idx3-ubyte/train-images-idx3-ubyte"
 #define TRAIN_LABELS "Datasets/MNIST/train-labels-idx1-ubyte/train-labels-idx1-ubyte"
-#define IMAGE_SIZE 28*28
-
-
-// Function to perform one-hot encoding for MNIST labels
-void one_hot_encode(unsigned char *labels, int num_labels, float *one_hot_matrix, int num_classes) {
-    // Initialize the matrix to all zeros
-    memset(one_hot_matrix, 0, num_labels * num_classes * sizeof(float));
-
-    for (int i = 0; i < num_labels; ++i) {
-        int label = labels[i];
-        if (label >= 0 && label < num_classes) {
-            one_hot_matrix[i * num_classes + label] = 1;
-        }
-    }
-}
-
-void update_weights(FCLayer *layer, float learning_rate) {
-    // Update weights
-    for (int i = 0; i < layer->input_size * layer->output_size; ++i) {
-	//	printf("%f - %f(%f) == ", layer->weights[i], learning_rate, layer->d_weights[i]);
-        layer->weights[i] = layer->weights[i] - (learning_rate * layer->d_weights[i]);
-	//	printf("%f\n", layer->weights[i]);
-    }
-
-    // Update biases
-    for (int i = 0; i < layer->output_size; ++i) {
-        layer->biases[i] -= learning_rate * layer->d_biases[i];
-    }
-}
-
-void print_averages(FCLayer *layer) {
-    float weight_sum = 0.0f;
-    float bias_sum = 0.0f;
-
-    // Calculate average weights
-    for (int i = 0; i < layer->input_size * layer->output_size; ++i) {
-        weight_sum += layer->weights[i];
-    }
-    printf("Average weight: %f\n", weight_sum / (layer->input_size * layer->output_size));
-
-    // Calculate average biases
-    for (int i = 0; i < layer->output_size; ++i) {
-        bias_sum += layer->biases[i];
-    }
-    printf("Average bias: %f\n", bias_sum / layer->output_size);
-}
+#define IMAGE_SIZE 28*28 
+#define TEST_IMAGES "Datasets/MNIST/t10k-images.idx3-ubyte"
+#define TEST_LABELS "Datasets/MNIST/t10k-labels.idx1-ubyte"
 
 int get_predicted_class(float *output, int size) {
     int predicted_class = 0;
@@ -87,17 +44,9 @@ int main(){
 	//one hot encoding
     float *one_hot_matrix = (float *)malloc(num_labels * 10 * sizeof(float));
 	one_hot_encode(labels, num_labels, one_hot_matrix, 10);
-	// // Print the one-hot encoded matrix
-    // printf("One-hot encoded matrix:\n");
-    // for (int i = 0; i < 1; ++i) {
-    //     for (int j = 0; j < 10; ++j) {
-    //         printf("%f ", one_hot_matrix[i * 10 + j]);
-    //     }
-    //     printf("\n");
-    // }
 
 	// create layers
-	unsigned int epochs = 3;
+	unsigned int epochs = 5;
 	FCLayer *layer1 = init_fc_layer(IMAGE_SIZE, 128, ReLU);
 	FCLayer *layer2 = init_fc_layer(128, 10, SOFTMAX);
 
@@ -108,32 +57,55 @@ int main(){
 			fc_forward(layer1, images+(IMAGE_SIZE*i));
 			fc_forward_softmax(layer2, layer1->output);
 
-
 			// find d_output
 			float *d_output = derivative_softmax_categorical_cross_entropy(layer2->output, one_hot_matrix+(10*i), 10);
 
 			fc_backward(layer2, d_output);
 			fc_backward(layer1, layer2->d_input);
 			
-		
+			// calculate loss
+			float loss = categorical_cross_entropy(layer2->output, one_hot_matrix+(10*i), layer2->output_size);
+
+			if (*(labels+(i)) == get_predicted_class(layer2->output, 10))
+				num_correct++;
+			if (i % 5 == 0)
+				printf("epoch: %d, loss, %f, actual: %d, predicted: %d, accuracy: %f\n", j+1, loss, *(labels+(i)), get_predicted_class(layer2->output, 10), num_correct/(float)i);
 
 			// update weights
 			float learning_rate = 0.001f;
 			update_weights(layer2, learning_rate);
 			update_weights(layer1, learning_rate);
-
-
-			if (*(labels+(i)) == get_predicted_class(layer2->output, 10))
-				num_correct++;
-			printf("LABEL++++++ %d, predicted: %d, accuracy: %f\n", *(labels+(i)), get_predicted_class(layer2->output, 10), num_correct/(float)i);
-			// for (int k = 0; k < 10; ++k) {
-           	//  	printf("%f ", one_hot_matrix[i * 10 + k]);
-			// }
-			// printf("\n");
+			
 			free(d_output);
-		}	
+		}
 	}
 
+	// load the training data
+	unsigned char *test_labels;
+	float *test_images;
+
+	load_mnist_images(TEST_IMAGES, &test_images, &num_images);
+	printf("Num of images: %d\n", num_images);
+
+	load_mnist_labels(TEST_LABELS, &test_labels, &num_labels);
+	printf("Num of labels: %d\n", num_labels);
+
+	//one hot encoding
+    float *test_one_hot_matrix = (float *)malloc(num_labels * 10 * sizeof(float));
+	one_hot_encode(test_labels, num_labels, test_one_hot_matrix, 10);
+
+	int num_correct = 0;
+	for (int i = 0; i < 10000; ++i){
+		fc_forward(layer1, test_images+(IMAGE_SIZE*i));
+		fc_forward_softmax(layer2, layer1->output);
+
+		if (*(test_labels+(i)) == get_predicted_class(layer2->output, 10))
+			num_correct++;
+
+		if (i % 5 == 0)
+			printf("accuracy: %f, actual: %d, predicted: %d\n", num_correct/10000.0f, *(test_labels+(i)), get_predicted_class(layer2->output, 10));
+	}
+	
 
 	// Free allocated memory
     free(one_hot_matrix);	
