@@ -46,9 +46,7 @@ FCLayer* init_fc_layer(unsigned int input_size, unsigned int output_size, Activa
 
 void fc_forward(FCLayer *layer, float *input){
     // copy input into layer->input
-    memset(layer->output, 0, layer->output_size * sizeof(float));  // Zero out output
     memcpy(layer->input, input, layer->input_size * sizeof(float));
-    
 
     // copy biases into output layer
     memcpy(layer->output, layer->biases, layer->output_size * sizeof(float));
@@ -60,14 +58,14 @@ void fc_forward(FCLayer *layer, float *input){
         }
     }
     
-    // get the activation function
-    float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
+    // // get the activation function
+    // float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
 
-    // apply activation function on outputs
-    for (int i = 0; i < layer->output_size; ++i){
-        float a = acti_func(layer->output[i], false);
-        layer->output[i] = a;
-    }
+    // // apply activation function on outputs
+    // for (int i = 0; i < layer->output_size; ++i){
+    //     float a = acti_func(layer->output[i], false);
+    //     layer->output[i] = a;
+    // }
 
 }
 
@@ -93,16 +91,6 @@ void fc_forward_softmax(FCLayer *layer, float *input){
     // apply softmax
     activation_softmax(layer);
 }
-
-void reset_gradients(float* d_weights, float* d_biases, int size_weights, int size_biases) {
-    for (int i = 0; i < size_weights; i++) {
-        d_weights[i] = 0.0;
-    }
-    for (int i = 0; i < size_biases; i++) {
-        d_biases[i] = 0.0;
-    }
-}
-
 
 void fc_backward(FCLayer *layer, float *d_output){
     // get activation function and it's derivative
