@@ -5,9 +5,6 @@
 #include "nn/activation.h"
 #include "data_loader.h"
 #include <string.h>
-#include "nn/cuda/nn_cuda.h"  // Include the CUDA header file
-#include <cuda_runtime.h>
-
 
 #define TRAIN_IMAGES "Datasets/MNIST/train-images-idx3-ubyte/train-images-idx3-ubyte"
 #define TRAIN_LABELS "Datasets/MNIST/train-labels-idx1-ubyte/train-labels-idx1-ubyte"
@@ -57,28 +54,8 @@ int main(){
 		int num_correct = 0;
 		for (int i = 0; i < 60000; ++i){
 			
-			fc_forward_CUDA(layer1, images+(IMAGE_SIZE*i));
-			cudaDeviceSynchronize(); // Ensure CUDA operations are complete
-			// apply relu
-			for (int i = 0; i < layer1->output_size; ++i){
-				float a = activation_relu(layer1->output[i], false);
-				layer1->output[i] = a;
-
-			}
-			for (int i = 0; i < layer1->output_size; ++i){
-				printf("%f, ", layer1->output[i]);
-			}
-			printf("\n");
-
-			fc_forward_CUDA(layer2, layer1->output);
-			cudaDeviceSynchronize(); // Ensure CUDA operations are complete
-			activation_softmax(layer2);
-			
-			// for (int i = 0; i < layer2->output_size; ++i){
-			// 	printf("%f, ", layer2->output[i]);
-			// }
-			// printf("\n");
-
+			fc_forward(layer1, images+(IMAGE_SIZE*i));
+			fc_forward_softmax(layer2, layer1->output);
 
 			// find d_output
 			float *d_output = derivative_softmax_categorical_cross_entropy(layer2->output, one_hot_matrix+(10*i), 10);
@@ -91,7 +68,7 @@ int main(){
 
 			if (*(labels+(i)) == get_predicted_class(layer2->output, 10))
 				num_correct++;
-			if (i % 1 == 0)
+			if (i % 5 == 0)
 				printf("epoch: %d, loss, %f, actual: %d, predicted: %d, accuracy: %f\n", j+1, loss, *(labels+(i)), get_predicted_class(layer2->output, 10), num_correct/(float)i);
 
 			// update weights
@@ -118,17 +95,9 @@ int main(){
 	one_hot_encode(test_labels, num_labels, test_one_hot_matrix, 10);
 
 	int num_correct = 0;
-	for (int i = 0; i < 1000; ++i){
-		fc_forward_CUDA(layer1, test_images+(IMAGE_SIZE*i));
-		// apply relu
-		for (int i = 0; i < layer1->output_size; ++i){
-			float a = activation_relu(layer1->output[i], false);
-			layer1->output[i] = a;
-		}
-
-		fc_forward_CUDA(layer2, layer1->output);
-		// apply softmax
-		activation_softmax(layer2);
+	for (int i = 0; i < 10000; ++i){
+		fc_forward(layer1, test_images+(IMAGE_SIZE*i));
+		fc_forward_softmax(layer2, layer1->output);
 
 		if (*(test_labels+(i)) == get_predicted_class(layer2->output, 10))
 			num_correct++;

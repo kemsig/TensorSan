@@ -61,13 +61,13 @@ void fc_forward(FCLayer *layer, float *input){
     }
     
     // // get the activation function
-    float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
+    // float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
 
-    // apply activation function on outputs
-    for (int i = 0; i < layer->output_size; ++i){
-        float a = acti_func(layer->output[i], false);
-        layer->output[i] = a;
-    }
+    // // apply activation function on outputs
+    // for (int i = 0; i < layer->output_size; ++i){
+    //     float a = acti_func(layer->output[i], false);
+    //     layer->output[i] = a;
+    // }
 
 }
 

@@ -46,6 +46,20 @@ FCLayer* init_fc_layer(unsigned int input_size, unsigned int output_size, Activa
     return layer;
 }
 
+// Function to copy an FC layer
+FCLayer *copy_fc_layer(FCLayer *original_layer) {
+    // Allocate a new layer
+    FCLayer *new_layer = init_fc_layer(original_layer->input_size, original_layer->output_size, original_layer->activation_function);
+
+    // Copy the weights
+    memcpy(new_layer->weights, original_layer->weights, original_layer->input_size * original_layer->output_size * sizeof(float));
+
+    // Copy the biases
+    memcpy(new_layer->biases, original_layer->biases, original_layer->output_size * sizeof(float));
+
+    return new_layer;
+}
+
 void fc_forward(FCLayer *layer, float *input){
     // copy input into layer->input
     memcpy(layer->input, input, layer->input_size * sizeof(float));
@@ -61,13 +75,13 @@ void fc_forward(FCLayer *layer, float *input){
     }
     
     // // get the activation function
-    float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
+    // float (*acti_func)(float,bool) = apply_activation(layer->activation_function);
 
-    // apply activation function on outputs
-    for (int i = 0; i < layer->output_size; ++i){
-        float a = acti_func(layer->output[i], false);
-        layer->output[i] = a;
-    }
+    // // apply activation function on outputs
+    // for (int i = 0; i < layer->output_size; ++i){
+    //     float a = acti_func(layer->output[i], false);
+    //     layer->output[i] = a;
+    // }
 
 }
 

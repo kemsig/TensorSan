@@ -5,7 +5,7 @@ LDFLAGS = -lm
 
 
 # Source files
-SRCS = main.c data_loader.c nn/nn.c nn/activation.c
+SRCS = cuda_main.c data_loader.c nn/nn.c nn/activation.c
 
 
 # Object files
@@ -13,7 +13,7 @@ OBJS = $(SRCS:.c=.o)
 
 
 # Header files
-HEADERS = data_loader.h nn/nn.h nn/activation.h nn/structs.h 
+HEADERS = data_loader.h nn/nn.h nn/activation.h nn/structs.h nn/cuda/nn_cuda.h
 
 # Target to build the executable
 all: tensor_san
